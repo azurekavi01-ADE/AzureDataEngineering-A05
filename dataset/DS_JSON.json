@@ -1,0 +1,21 @@
+{
+	"name": "DS_JSON",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "storesJson",
+				"folderPath": "SinkFiles",
+				"fileSystem": "azuredataengineering-a05"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

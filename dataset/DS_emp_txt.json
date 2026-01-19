@@ -1,0 +1,70 @@
+{
+	"name": "DS_emp_txt",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "employeetxt.csv",
+				"folderPath": "HR Data",
+				"fileSystem": "azuredataengineering-a05"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "EmployeeID",
+				"type": "String"
+			},
+			{
+				"name": "First_name",
+				"type": "String"
+			},
+			{
+				"name": "Last_Name",
+				"type": "String"
+			},
+			{
+				"name": "MailId",
+				"type": "String"
+			},
+			{
+				"name": "Contact",
+				"type": "String"
+			},
+			{
+				"name": "DOJ",
+				"type": "String"
+			},
+			{
+				"name": "Jobid",
+				"type": "String"
+			},
+			{
+				"name": "Salary",
+				"type": "String"
+			},
+			{
+				"name": "MGRID",
+				"type": "String"
+			},
+			{
+				"name": "DeptID",
+				"type": "String"
+			},
+			{
+				"name": "Fullname",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

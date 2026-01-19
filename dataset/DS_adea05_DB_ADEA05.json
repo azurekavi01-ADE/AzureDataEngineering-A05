@@ -1,0 +1,17 @@
+{
+	"name": "DS_adea05_DB_ADEA05",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL_DB_ADEA05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "agg"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

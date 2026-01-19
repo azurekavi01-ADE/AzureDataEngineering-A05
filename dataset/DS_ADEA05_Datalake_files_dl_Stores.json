@@ -1,0 +1,22 @@
+{
+	"name": "DS_ADEA05_Datalake_files_dl_Stores",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "dl_stores",
+				"folderPath": "Datalakefiles",
+				"fileSystem": "azuredataengineering-a05"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

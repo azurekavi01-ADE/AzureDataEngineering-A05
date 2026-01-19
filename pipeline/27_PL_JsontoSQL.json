@@ -1,0 +1,259 @@
+{
+	"name": "27_PL_JsontoSQL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['date']"
+								},
+								"sink": {
+									"name": "date",
+									"type": "Date"
+								}
+							},
+							{
+								"source": {
+									"path": "$['customer']"
+								},
+								"sink": {
+									"name": "customer",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['product']"
+								},
+								"sink": {
+									"name": "items_Product",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['quantity']"
+								},
+								"sink": {
+									"name": "items_Quantity",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['price']"
+								},
+								"sink": {
+									"name": "items_Price",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['total']"
+								},
+								"sink": {
+									"name": "total",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['payment_method']"
+								},
+								"sink": {
+									"name": "credit",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": ""
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Json_SourceFiles_SalesJson",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADEA05_Multifiles",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy data2",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['id']"
+								},
+								"sink": {
+									"name": "id"
+								}
+							},
+							{
+								"source": {
+									"path": "$['date']"
+								},
+								"sink": {
+									"name": "date"
+								}
+							},
+							{
+								"source": {
+									"path": "$['customer']"
+								},
+								"sink": {
+									"name": "customer"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['product']"
+								},
+								"sink": {
+									"name": "product"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['quantity']"
+								},
+								"sink": {
+									"name": "quantity"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['price']"
+								},
+								"sink": {
+									"name": "price"
+								}
+							},
+							{
+								"source": {
+									"path": "$['total']"
+								},
+								"sink": {
+									"name": "total"
+								}
+							},
+							{
+								"source": {
+									"path": "$['payment_method']"
+								},
+								"sink": {
+									"name": "payment_method"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Json_SourceFiles_SalesJson",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DQ_ADE_A05_DiffMultifiles",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-01-17T01:29:28Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

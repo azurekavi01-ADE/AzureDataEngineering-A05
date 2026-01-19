@@ -1,0 +1,74 @@
+{
+	"name": "DS_ADEA05_Productfile",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "products.csv",
+				"folderPath": "SourceFiles",
+				"fileSystem": "azuredataengineering-a05"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Product ID",
+				"type": "String"
+			},
+			{
+				"name": "Category",
+				"type": "String"
+			},
+			{
+				"name": "Sub Category",
+				"type": "String"
+			},
+			{
+				"name": "Description PT",
+				"type": "String"
+			},
+			{
+				"name": "Description DE",
+				"type": "String"
+			},
+			{
+				"name": "Description FR",
+				"type": "String"
+			},
+			{
+				"name": "Description ES",
+				"type": "String"
+			},
+			{
+				"name": "Description EN",
+				"type": "String"
+			},
+			{
+				"name": "Description ZH",
+				"type": "String"
+			},
+			{
+				"name": "Color",
+				"type": "String"
+			},
+			{
+				"name": "Sizes",
+				"type": "String"
+			},
+			{
+				"name": "Production Cost",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

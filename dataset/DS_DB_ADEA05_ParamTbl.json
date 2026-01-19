@@ -1,0 +1,31 @@
+{
+	"name": "DS_DB_ADEA05_ParamTbl",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL_DB_ADEA05",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Tblname": {
+				"type": "string"
+			},
+			"SchemaName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().Tblname",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

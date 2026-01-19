@@ -1,0 +1,42 @@
+{
+	"name": "DS_JOB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "jobstxt.csv",
+				"folderPath": "HR Data",
+				"fileSystem": "azuredataengineering-a05"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "jobid",
+				"type": "String"
+			},
+			{
+				"name": "Designation",
+				"type": "String"
+			},
+			{
+				"name": "min salary",
+				"type": "String"
+			},
+			{
+				"name": "Max Salary",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

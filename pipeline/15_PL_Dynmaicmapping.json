@@ -1,0 +1,367 @@
+{
+	"name": "15_PL_Dynmaicmapping",
+	"properties": {
+		"activities": [
+			{
+				"name": "dyn mapping",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Product ID",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "ProductID",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "Category",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Category",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Sub Category",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "SubCategory",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description PT",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptionPT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description DE",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptionDE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description FR",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptionFR",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description ES",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptionES",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description EN",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptionEN",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Description ZH",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "DescriptioZH",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Color",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Color",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Sizes",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "Sizes",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Production Cost",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "ProductionCost",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_ADEA05_DiffMultiFiles_ParamFilename",
+						"type": "DatasetReference",
+						"parameters": {
+							"Filename": "products.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADEA05_DB_ADEA05_TableName",
+						"type": "DatasetReference",
+						"parameters": {
+							"Tablename": "Dyn_Products"
+						}
+					}
+				]
+			},
+			{
+				"name": "fetch filenames from folder",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DS_ADEA05_SplitFilesFolder",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "loop filenames",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "fetch filenames from folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('fetch filenames from folder').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Lookup1",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select * from [dbo].[Metastore] where SourceFilename=','''',item().name,'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_adea05_DB_ADEA05",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"value": "@json(activity('Lookup1').output.firstRow.Mappinginfo)",
+									"type": "Expression"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_ADEA05_DiffMultiFiles_ParamFilename",
+									"type": "DatasetReference",
+									"parameters": {
+										"Filename": {
+											"value": "@activity('Lookup1').output.firstRow.SourceFilename",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DB_ADEA05_ParamTbl",
+									"type": "DatasetReference",
+									"parameters": {
+										"Tblname": {
+											"value": "@activity('Lookup1').output.firstRow.SinkTableName",
+											"type": "Expression"
+										},
+										"SchemaName": {
+											"value": "@activity('Lookup1').output.firstRow.SinkSchemaName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-01-08T01:26:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

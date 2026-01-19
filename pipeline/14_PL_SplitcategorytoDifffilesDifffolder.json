@@ -1,0 +1,153 @@
+{
+	"name": "14_PL_SplitcategorytoDifffilesDifffolder",
+	"properties": {
+		"activities": [
+			{
+				"name": "get distinct catgeory",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_DB_ADEA05",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "select distinct ISNULL (Category, 'NA') as category\nfrom discounts "
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "loop all category",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "get distinct catgeory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('get distinct catgeory').output.resultSets[0].rows",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "assign singlecategory",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "singlecatgeory",
+								"value": {
+									"value": "@item().category",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "split data load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "assign singlecategory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@concat('select * from discounts where isnull(category,',\n        '''','NA','''',') =',\n'''',variables('singlecatgeory'),'''')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_adea05_DB_ADEA05",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADEA05_SplitedFiles",
+									"type": "DatasetReference",
+									"parameters": {
+										"Filename": {
+											"value": "@concat(if(equals(length(variables('singlecatgeory')),0 ),'NA',variables('singlecatgeory')),'.csv')",
+											"type": "Expression"
+										},
+										"dynFolderName": {
+											"value": "@concat('/AllFile/',variables('singlecatgeory'))",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"singlecatgeory": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-01-06T01:20:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
