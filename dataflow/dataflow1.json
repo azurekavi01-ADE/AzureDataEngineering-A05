@@ -1,0 +1,68 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Json_NestedJson",
+						"type": "DatasetReference"
+					},
+					"name": "salesJson"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DS_adea05_DB_ADEA05",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "flatten1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          date as string,",
+				"          customer as string,",
+				"          items as (product as string, quantity as integer, price as integer)[],",
+				"          total as integer,",
+				"          payment_method as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> salesJson",
+				"salesJson foldDown(unroll(items),",
+				"     mapColumn(",
+				"          id,",
+				"          date,",
+				"          customer,",
+				"          product = items.product,",
+				"          quantity = items.quantity,",
+				"          price = items.price,",
+				"          total,",
+				"          payment_method",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+			]
+		}
+	}
+}
