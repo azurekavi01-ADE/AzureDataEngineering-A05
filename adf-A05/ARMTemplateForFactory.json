@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_ASQL_DB_ADEA05'"
 		},
+		"LocalFileSystem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LocalFileSystem'"
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -30,6 +34,14 @@
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "AzureAdmin"
+		},
+		"LocalFileSystem_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "D:\\"
+		},
+		"LocalFileSystem_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "DESKTOP-F87UDHL\\Lenovo"
 		}
 	},
 	"variables": {
@@ -2803,6 +2815,52 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/28_PL_Flattern')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Falttern the Json",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"salesJson": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DQ_ADEA05_Employeesfiles')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3843,6 +3901,67 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_Json_NestedJson')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLSGEN2_adea05",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "nested Jsonsales.json",
+						"folderPath": "JsonSourceFiles",
+						"fileSystem": "azuredataengineering-a05"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"date": {
+							"type": "string"
+						},
+						"customer": {
+							"type": "string"
+						},
+						"items": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"product": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "integer"
+									},
+									"price": {
+										"type": "integer"
+									}
+								}
+							}
+						},
+						"total": {
+							"type": "integer"
+						},
+						"payment_method": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLSGEN2_adea05')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_Json_SourceFiles_SalesJson')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -4097,7 +4216,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": "agg"
+					"table": "customer100"
 				}
 			},
 			"dependsOn": [
@@ -4258,6 +4377,264 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Json_NestedJson",
+								"type": "DatasetReference"
+							},
+							"name": "salesJson"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DS_adea05_DB_ADEA05",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "flatten1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          id as integer,",
+						"          date as string,",
+						"          customer as string,",
+						"          items as (product as string, quantity as integer, price as integer)[],",
+						"          total as integer,",
+						"          payment_method as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'arrayOfDocuments') ~> salesJson",
+						"salesJson foldDown(unroll(items),",
+						"     mapColumn(",
+						"          id,",
+						"          date,",
+						"          customer,",
+						"          product = items.product,",
+						"          quantity = items.quantity,",
+						"          price = items.price,",
+						"          total,",
+						"          payment_method",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flatten1",
+						"flatten1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Json_NestedJson')]",
+				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Selfhosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LocalFileSystem')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LocalFileSystem_properties_typeProperties_host')]",
+					"userId": "[parameters('LocalFileSystem_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LocalFileSystem_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "Selfhosted-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/Selfhosted-IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/29_PL_MovefilelocaltoADLSgen2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "FileServerReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Local_Customer100",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_adea05_DB_ADEA05",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Local_Customer100')]",
+				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Local_Customer100')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LocalFileSystem",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"fileName": "customers-100.csv",
+						"folderPath": "Kavichandran/Azure Data Engineering/Source sample Files"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Index",
+						"type": "String"
+					},
+					{
+						"name": "Customer Id",
+						"type": "String"
+					},
+					{
+						"name": "First Name",
+						"type": "String"
+					},
+					{
+						"name": "Last Name",
+						"type": "String"
+					},
+					{
+						"name": "Company",
+						"type": "String"
+					},
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "Country",
+						"type": "String"
+					},
+					{
+						"name": "Phone 1",
+						"type": "String"
+					},
+					{
+						"name": "Phone 2",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "Subscription Date",
+						"type": "String"
+					},
+					{
+						"name": "Website",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LocalFileSystem')]"
+			]
 		}
 	]
 }

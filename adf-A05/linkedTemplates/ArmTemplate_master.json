@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_ASQL_DB_ADEA05'"
 		},
+		"LocalFileSystem_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LocalFileSystem'"
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -30,6 +34,14 @@
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "AzureAdmin"
+		},
+		"LocalFileSystem_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "D:\\"
+		},
+		"LocalFileSystem_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "DESKTOP-F87UDHL\\Lenovo"
 		},
 		"containerUri": {
 			"type": "string",
@@ -93,6 +105,15 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LocalFileSystem_password": {
+						"value": "[parameters('LocalFileSystem_password')]"
+					},
+					"LocalFileSystem_properties_typeProperties_host": {
+						"value": "[parameters('LocalFileSystem_properties_typeProperties_host')]"
+					},
+					"LocalFileSystem_properties_typeProperties_userId": {
+						"value": "[parameters('LocalFileSystem_properties_typeProperties_userId')]"
 					}
 				}
 			},

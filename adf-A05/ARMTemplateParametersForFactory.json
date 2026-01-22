@@ -11,6 +11,9 @@
 		"LS_ASQL_DB_ADEA05_password": {
 			"value": ""
 		},
+		"LocalFileSystem_password": {
+			"value": ""
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"value": "https://adea05.dfs.core.windows.net/"
 		},
@@ -22,6 +25,12 @@
 		},
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"value": "AzureAdmin"
+		},
+		"LocalFileSystem_properties_typeProperties_host": {
+			"value": "D:\\"
+		},
+		"LocalFileSystem_properties_typeProperties_userId": {
+			"value": "DESKTOP-F87UDHL\\Lenovo"
 		}
 	}
 }
