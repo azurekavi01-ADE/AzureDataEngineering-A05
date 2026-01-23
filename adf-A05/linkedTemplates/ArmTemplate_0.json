@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_ASQL_DB_ADEA05'"
 		},
+		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://ADEA05secrets.vault.azure.net/"
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -73,6 +77,19 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2025-12-28T02:34:09Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADEA05KeyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('ADEA05KeyVault_properties_typeProperties_baseUrl')]"
+				}
 			},
 			"dependsOn": []
 		},
@@ -867,41 +884,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_ADLSGEN2_adea05')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_DB_ADEA05_ParamTbl')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_DB_ADEA05",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Tblname": {
-						"type": "string"
-					},
-					"SchemaName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().SchemaName",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().Tblname",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_DB_ADEA05')]"
 			]
 		}
 	]

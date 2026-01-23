@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LocalFileSystem'"
 		},
+		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://ADEA05secrets.vault.azure.net/"
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -75,6 +79,9 @@
 					},
 					"LS_ASQL_DB_ADEA05_password": {
 						"value": "[parameters('LS_ASQL_DB_ADEA05_password')]"
+					},
+					"ADEA05KeyVault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('ADEA05KeyVault_properties_typeProperties_baseUrl')]"
 					},
 					"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLSGEN2_adea05_properties_typeProperties_url')]"

@@ -14,6 +14,9 @@
 		"LocalFileSystem_password": {
 			"value": ""
 		},
+		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://ADEA05secrets.vault.azure.net/"
+		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"value": "https://adea05.dfs.core.windows.net/"
 		},
