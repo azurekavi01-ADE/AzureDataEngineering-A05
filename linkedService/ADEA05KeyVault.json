@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "AzureKeyVault",
 		"typeProperties": {
-			"baseUrl": "https://ADEA05secrets.vault.azure.net/"
+			"baseUrl": "https://ADEA05-AKV.vault.azure.net/"
 		}
 	}
 }
