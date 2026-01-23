@@ -11,6 +11,9 @@
 		"LS_ASQL_DB_ADEA05_password": {
 			"value": ""
 		},
+		"LS_LocalSQLServer_password": {
+			"value": ""
+		},
 		"LocalFileSystem_password": {
 			"value": ""
 		},
@@ -28,6 +31,15 @@
 		},
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"value": "AzureAdmin"
+		},
+		"LS_LocalSQLServer_properties_typeProperties_server": {
+			"value": "."
+		},
+		"LS_LocalSQLServer_properties_typeProperties_database": {
+			"value": "sample"
+		},
+		"LS_LocalSQLServer_properties_typeProperties_userName": {
+			"value": "sa"
 		},
 		"LocalFileSystem_properties_typeProperties_host": {
 			"value": "D:\\"
