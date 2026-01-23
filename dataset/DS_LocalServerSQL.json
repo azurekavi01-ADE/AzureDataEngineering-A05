@@ -1,0 +1,39 @@
+{
+	"name": "DS_LocalServerSQL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_LocalSQLServer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "SourceFilename",
+				"type": "varchar"
+			},
+			{
+				"name": "SinkSchemaName",
+				"type": "varchar"
+			},
+			{
+				"name": "SinkTableName",
+				"type": "varchar"
+			},
+			{
+				"name": "MappingInfo",
+				"type": "varchar"
+			},
+			{
+				"name": "update_date",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "sales"
+		}
+	}
+}
