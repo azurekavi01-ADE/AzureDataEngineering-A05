@@ -1,0 +1,21 @@
+{
+	"name": "LS_LocalSQLServer",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "ade-a05.database.windows.net",
+			"database": "DB_ADEA05",
+			"encrypt": "optional",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "AzureAdmin",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI1ZDc1OTI0MS00YTk5LTRjZTUtYTQ5NS02OGFjNjk5ZTg2ZjgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Selfhosted-IR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
