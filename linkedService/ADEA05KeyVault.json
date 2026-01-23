@@ -1,0 +1,10 @@
+{
+	"name": "ADEA05KeyVault",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://ADEA05secrets.vault.azure.net/"
+		}
+	}
+}
