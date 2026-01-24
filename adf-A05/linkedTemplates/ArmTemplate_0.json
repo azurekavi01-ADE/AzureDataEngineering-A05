@@ -15,10 +15,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_ASQL_DB_ADEA05'"
 		},
-		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://ADEA05secrets.vault.azure.net/"
-		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -34,6 +30,10 @@
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "AzureAdmin"
+		},
+		"LS_Keyvault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://ADEKeyVaults.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -77,19 +77,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2025-12-28T02:34:09Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ADEA05KeyVault')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('ADEA05KeyVault_properties_typeProperties_baseUrl')]"
-				}
 			},
 			"dependsOn": []
 		},
@@ -139,6 +126,19 @@
 			"properties": {
 				"type": "SelfHosted",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Keyvault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_Keyvault_properties_typeProperties_baseUrl')]"
+				}
 			},
 			"dependsOn": []
 		},

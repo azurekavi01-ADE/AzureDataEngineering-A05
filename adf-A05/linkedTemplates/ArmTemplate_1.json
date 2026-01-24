@@ -11,17 +11,13 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_LocalSQLServer'"
 		},
-		"LocalFileSystem_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LocalFileSystem'"
-		},
 		"LS_LocalSQLServer_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "."
 		},
 		"LS_LocalSQLServer_properties_typeProperties_database": {
 			"type": "string",
-			"defaultValue": "sample"
+			"defaultValue": "AdventureWorks"
 		},
 		"LS_LocalSQLServer_properties_typeProperties_userName": {
 			"type": "string",
@@ -832,13 +828,47 @@
 					"host": "[parameters('LocalFileSystem_properties_typeProperties_host')]",
 					"userId": "[parameters('LocalFileSystem_properties_typeProperties_userId')]",
 					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LocalFileSystem_password')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_Keyvault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "usrpassword"
 					}
 				},
 				"connectVia": {
 					"referenceName": "Selfhosted-IR",
 					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADEDatabase_TableName')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_DB_ADEA05",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@split(dataset().Tablename,'.' )[0]",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@split(dataset().Tablename,'.' )[1]",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": []
@@ -1001,84 +1031,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_adeA05_Sourcefiles_stores')]",
 				"[concat(variables('factoryId'), '/datasets/DS_adeA05_sinkFiles')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/03_Copyingtherootfolder')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy rootfiles",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": true,
-									"partitionRootPath": "azuredataengineering-a05/GlobalData"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_adeA05_GlobalData_citysales",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_ADEA05_Sinkfiles_GlobalData",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-12-27T01:16:44Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_adeA05_GlobalData_citysales')]"
 			]
 		}
 	]

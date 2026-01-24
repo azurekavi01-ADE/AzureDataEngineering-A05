@@ -19,14 +19,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_LocalSQLServer'"
 		},
-		"LocalFileSystem_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LocalFileSystem'"
-		},
-		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://ADEA05secrets.vault.azure.net/"
-		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
@@ -49,7 +41,7 @@
 		},
 		"LS_LocalSQLServer_properties_typeProperties_database": {
 			"type": "string",
-			"defaultValue": "sample"
+			"defaultValue": "AdventureWorks"
 		},
 		"LS_LocalSQLServer_properties_typeProperties_userName": {
 			"type": "string",
@@ -62,6 +54,10 @@
 		"LocalFileSystem_properties_typeProperties_userId": {
 			"type": "string",
 			"defaultValue": "DESKTOP-F87UDHL\\Lenovo"
+		},
+		"LS_Keyvault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://ADEKeyVaults.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -4675,19 +4671,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ADEA05KeyVault')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('ADEA05KeyVault_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/LS_ADLSGEN2_adea05')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -4765,8 +4748,12 @@
 					"host": "[parameters('LocalFileSystem_properties_typeProperties_host')]",
 					"userId": "[parameters('LocalFileSystem_properties_typeProperties_userId')]",
 					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LocalFileSystem_password')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_Keyvault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "usrpassword"
 					}
 				},
 				"connectVia": {
@@ -4775,7 +4762,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/Selfhosted-IR')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/Selfhosted-IR')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_Keyvault')]"
 			]
 		},
 		{
@@ -4860,6 +4848,237 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_Json_NestedJson')]",
 				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_Keyvault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_Keyvault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/31_PL_BulkLoadlocaltoASQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "fetch the tablename",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select TableName from dbo.Control_table\nwhere Load_flag =1 ",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_adea05_DB_ADEA05",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "fetch the tablename",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('fetch the tablename').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "assignTableName",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "TableName",
+										"value": {
+											"value": "@item().TableName",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "assignTableName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_LocalServer_with_Parameter",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADEDatabase_TableName",
+											"type": "DatasetReference",
+											"parameters": {
+												"Tablename": {
+													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"TableName": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]",
+				"[concat(variables('factoryId'), '/datasets/DS_LocalServer_with_Parameter')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADEDatabase_TableName')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_LocalServer_with_Parameter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_LocalSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@split(dataset().TableName,'.' )[0]",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@split(dataset().TableName,'.' )[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_LocalSQLServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADEDatabase_TableName')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_DB_ADEA05",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@split(dataset().Tablename,'.' )[0]",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@split(dataset().Tablename,'.' )[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_DB_ADEA05')]"
 			]
 		}
 	]

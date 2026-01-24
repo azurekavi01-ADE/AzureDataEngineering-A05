@@ -14,12 +14,6 @@
 		"LS_LocalSQLServer_password": {
 			"value": ""
 		},
-		"LocalFileSystem_password": {
-			"value": ""
-		},
-		"ADEA05KeyVault_properties_typeProperties_baseUrl": {
-			"value": "https://ADEA05secrets.vault.azure.net/"
-		},
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"value": "https://adea05.dfs.core.windows.net/"
 		},
@@ -36,7 +30,7 @@
 			"value": "."
 		},
 		"LS_LocalSQLServer_properties_typeProperties_database": {
-			"value": "sample"
+			"value": "AdventureWorks"
 		},
 		"LS_LocalSQLServer_properties_typeProperties_userName": {
 			"value": "sa"
@@ -46,6 +40,9 @@
 		},
 		"LocalFileSystem_properties_typeProperties_userId": {
 			"value": "DESKTOP-F87UDHL\\Lenovo"
+		},
+		"LS_Keyvault_properties_typeProperties_baseUrl": {
+			"value": "https://ADEKeyVaults.vault.azure.net/"
 		},
 		"containerUri": {
 			"value": ""
