@@ -9,10 +9,10 @@
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
-					"referenceName": "ADEA05KeyVault",
+					"referenceName": "LS_Keyvault",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "usr"
+				"secretName": "usrpassword"
 			}
 		},
 		"connectVia": {
