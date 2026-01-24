@@ -1,0 +1,27 @@
+{
+	"name": "DS_LocalServer_with_Parameter",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_LocalSQLServer",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@split(dataset().TableName,'.' )[0]",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@split(dataset().TableName,'.' )[1]",
+				"type": "Expression"
+			}
+		}
+	}
+}
