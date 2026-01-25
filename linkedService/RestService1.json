@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "RestService",
 		"typeProperties": {
-			"url": "http://api.weatherstack.com/",
+			"url": "http://api.weatherstack.com/current",
 			"enableServerCertificateValidation": true,
 			"authenticationType": "Anonymous"
 		}
