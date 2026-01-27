@@ -1,10 +1,10 @@
 {
-	"name": "pipeline1",
+	"name": "32_RunSSIS PAckage",
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy data1",
-				"type": "Copy",
+				"name": "sample-basic",
+				"type": "ExecuteSSISPackage",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -15,44 +15,18 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "SqlServerSource",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
+					"packageLocation": {
+						"packagePath": "Test/sample/basicLoad.dtsx",
+						"type": "SSISDB"
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
+					"runtime": "x86",
+					"environmentPath": null,
+					"connectVia": {
+						"referenceName": "AzureSSIS-IR",
+						"type": "IntegrationRuntimeReference"
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "DS_LocalServerSQL",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_Metastore",
-						"type": "DatasetReference"
-					}
-				]
+					"loggingLevel": "Basic"
+				}
 			}
 		],
 		"annotations": []
