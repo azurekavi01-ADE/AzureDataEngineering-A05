@@ -35,6 +35,10 @@
 			"type": "string",
 			"defaultValue": "AzureAdmin"
 		},
+		"LS_Keyvault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://ADEKeyVaults.vault.azure.net/"
+		},
 		"LS_LocalSQLServer_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "."
@@ -55,9 +59,20 @@
 			"type": "string",
 			"defaultValue": "DESKTOP-F87UDHL\\Lenovo"
 		},
-		"LS_Keyvault_properties_typeProperties_baseUrl": {
+		"RestService1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://ADEKeyVaults.vault.azure.net/"
+			"defaultValue": "http://api.weatherstack.com/current"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"type": "string",
+			"defaultValue": "ade-a05.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"type": "string",
+			"defaultValue": "AzureAdmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"type": "secureString"
 		}
 	},
 	"variables": {
@@ -2950,14 +2965,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/31_PL_BulkLoadlocaltoASQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data1",
-						"type": "Copy",
+						"name": "fetch the tablename",
+						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -2969,45 +2984,173 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "SqlServerSource",
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "select TableName from dbo.Control_table\nwhere Load_flag =1 ",
 								"queryTimeout": "02:00:00",
 								"partitionOption": "None"
 							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_LocalServerSQL",
+							"dataset": {
+								"referenceName": "DS_adea05_DB_ADEA05",
 								"type": "DatasetReference",
 								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "fetch the tablename",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
-						"outputs": [
-							{
-								"referenceName": "DS_Metastore",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('fetch the tablename').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "assignTableName",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "TableName",
+										"value": {
+											"value": "@item().TableName",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "assignTableName",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "AzureSqlSink",
+											"writeBehavior": "insert",
+											"sqlWriterUseTableLock": false
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_LocalServer_with_Parameter",
+											"type": "DatasetReference",
+											"parameters": {
+												"TableName": {
+													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADEDatabase_TableName",
+											"type": "DatasetReference",
+											"parameters": {
+												"Tablename": {
+													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"TableName": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]",
+				"[concat(variables('factoryId'), '/datasets/DS_LocalServer_with_Parameter')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADEDatabase_TableName')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/32_RunSSIS PAckage')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "sample-basic",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "Test/sample/basicLoad.dtsx",
+								"type": "SSISDB"
+							},
+							"runtime": "x86",
+							"environmentPath": null,
+							"connectVia": {
+								"referenceName": "AzureSSIS-IR",
+								"type": "IntegrationRuntimeReference"
+							},
+							"loggingLevel": "Basic",
+							"projectConnectionManagers": {},
+							"packageConnectionManagers": {}
+						}
 					}
 				],
 				"policy": {
@@ -3016,8 +3159,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_LocalServerSQL')]",
-				"[concat(variables('factoryId'), '/datasets/DS_Metastore')]"
+				"[concat(variables('factoryId'), '/integrationRuntimes/AzureSSIS-IR')]"
 			]
 		},
 		{
@@ -3712,6 +3854,38 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADEDatabase_TableName')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_DB_ADEA05",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Tablename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@split(dataset().Tablename,'.' )[0]",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@split(dataset().Tablename,'.' )[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_DB_ADEA05')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_AdeA05_SourceFiles')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -4235,6 +4409,38 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_LocalServer_with_Parameter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_LocalSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"TableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@split(dataset().TableName,'.' )[0]",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@split(dataset().TableName,'.' )[1]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_LocalSQLServer')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_Local_Customer100')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -4710,6 +4916,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_Keyvault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_Keyvault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_LocalSQLServer')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -4765,6 +4984,21 @@
 				"[concat(variables('factoryId'), '/integrationRuntimes/Selfhosted-IR')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_Keyvault')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RestService1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestService1_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Selfhosted-IR')]",
@@ -4851,235 +5085,35 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_Keyvault')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
+				"type": "Managed",
 				"typeProperties": {
-					"baseUrl": "[parameters('LS_Keyvault_properties_typeProperties_baseUrl')]"
+					"computeProperties": {
+						"location": "East US",
+						"nodeSize": "Standard_D1_v2",
+						"numberOfNodes": 2,
+						"maxParallelExecutionsPerNode": 1
+					},
+					"ssisProperties": {
+						"catalogInfo": {
+							"catalogServerEndpoint": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint')]",
+							"catalogAdminUserName": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName')]",
+							"catalogAdminPassword": {
+								"type": "SecureString",
+								"value": "[parameters('AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword')]"
+							},
+							"catalogPricingTier": "Basic"
+						},
+						"edition": "Standard",
+						"runtimeVersion": "2017",
+						"licenseType": "LicenseIncluded"
+					}
 				}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/31_PL_BulkLoadlocaltoASQL')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "fetch the tablename",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select TableName from dbo.Control_table\nwhere Load_flag =1 ",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_adea05_DB_ADEA05",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "fetch the tablename",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('fetch the tablename').output.value",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "assignTableName",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "TableName",
-										"value": {
-											"value": "@item().TableName",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Copy data1",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "assignTableName",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "AzureSqlSink",
-											"writeBehavior": "insert",
-											"sqlWriterUseTableLock": false
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_LocalServer_with_Parameter",
-											"type": "DatasetReference",
-											"parameters": {
-												"TableName": {
-													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_ADEDatabase_TableName",
-											"type": "DatasetReference",
-											"parameters": {
-												"Tablename": {
-													"value": "@replace(replace(variables('TableName'),'[',''),']','')",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"TableName": {
-						"type": "String"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_adea05_DB_ADEA05')]",
-				"[concat(variables('factoryId'), '/datasets/DS_LocalServer_with_Parameter')]",
-				"[concat(variables('factoryId'), '/datasets/DS_ADEDatabase_TableName')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_LocalServer_with_Parameter')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_LocalSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@split(dataset().TableName,'.' )[0]",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@split(dataset().TableName,'.' )[1]",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_LocalSQLServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_ADEDatabase_TableName')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ASQL_DB_ADEA05",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Tablename": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@split(dataset().Tablename,'.' )[0]",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@split(dataset().Tablename,'.' )[1]",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL_DB_ADEA05')]"
-			]
 		}
 	]
 }

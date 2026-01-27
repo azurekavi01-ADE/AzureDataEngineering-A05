@@ -26,6 +26,9 @@
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_userName": {
 			"value": "AzureAdmin"
 		},
+		"LS_Keyvault_properties_typeProperties_baseUrl": {
+			"value": "https://ADEKeyVaults.vault.azure.net/"
+		},
 		"LS_LocalSQLServer_properties_typeProperties_server": {
 			"value": "."
 		},
@@ -41,8 +44,17 @@
 		"LocalFileSystem_properties_typeProperties_userId": {
 			"value": "DESKTOP-F87UDHL\\Lenovo"
 		},
-		"LS_Keyvault_properties_typeProperties_baseUrl": {
-			"value": "https://ADEKeyVaults.vault.azure.net/"
+		"RestService1_properties_typeProperties_url": {
+			"value": "http://api.weatherstack.com/current"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogServerEndpoint": {
+			"value": "ade-a05.database.windows.net"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminUserName": {
+			"value": "AzureAdmin"
+		},
+		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
+			"value": ""
 		},
 		"containerUri": {
 			"value": ""
