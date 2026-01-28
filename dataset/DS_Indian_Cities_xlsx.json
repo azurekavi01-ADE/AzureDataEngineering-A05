@@ -1,0 +1,39 @@
+{
+	"name": "DS_Indian_Cities_xlsx",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLSGEN2_adea05",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": "Cities",
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Cities-List.xlsx",
+				"folderPath": "SourceFiles",
+				"fileSystem": "azuredataengineering-a05"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": [
+			{
+				"name": "City",
+				"type": "String"
+			},
+			{
+				"name": "State",
+				"type": "String"
+			},
+			{
+				"name": "Tier Group",
+				"type": "String"
+			},
+			{
+				"name": "Population in Lakh (2011)",
+				"type": "String"
+			}
+		]
+	}
+}
