@@ -1,0 +1,12 @@
+{
+	"name": "LS_APIWeather",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "http://api.weatherstack.com/current",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
