@@ -13,21 +13,7 @@
 				}
 			],
 			"sinks": [],
-			"transformations": [
-				{
-					"name": "select1"
-				},
-				{
-					"name": "externalCall1",
-					"linkedService": {
-						"referenceName": "LS_APIWeather",
-						"type": "LinkedServiceReference"
-					}
-				},
-				{
-					"name": "RowrelativeURL"
-				}
-			],
+			"transformations": [],
 			"scriptLines": [
 				"source(output(",
 				"          City as string,",
@@ -37,31 +23,7 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 select(mapColumn(",
-				"          City,",
-				"          State",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"RowrelativeURL call(output(",
-				"          headers as [string,string],",
-				"          status as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     format: 'rest',",
-				"     store: 'restservice',",
-				"     timeout: 30,",
-				"     requestInterval: 0,",
-				"     httpMethod: 'GET',",
-				"     rowRelativeUrl: 'RowRelativeURL',",
-				"     headerColumnName: 'headers',",
-				"     bodyColumnName: 'body',",
-				"     statusColumnName: 'status',",
-				"     addResponseCode: true,",
-				"     requestFormat: ['type' -> 'json'],",
-				"     responseFormat: ['type' -> 'json', 'documentForm' -> 'documentPerLine']) ~> externalCall1",
-				"select1 derive(RowRelativeURL = '?access_key=1966ad61efd492c031d85036647b1f7b&query='+City) ~> RowrelativeURL"
+				"     ignoreNoFilesFound: false) ~> source1"
 			]
 		}
 	}
