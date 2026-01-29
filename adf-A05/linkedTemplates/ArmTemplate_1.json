@@ -874,7 +874,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": "CityWeatherReportNew"
+					"table": "final_discountTbl"
 				}
 			},
 			"dependsOn": []
