@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "DS_Json_NestedJson",
+						"referenceName": "Ds_Discount_incrementalFile",
 						"type": "DatasetReference"
 					},
 					"name": "salesJson"
@@ -23,36 +23,26 @@
 			],
 			"transformations": [
 				{
-					"name": "flatten1"
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
+				"parameters{",
+				"     MaxDate as string",
+				"}",
 				"source(output(",
-				"          id as integer,",
-				"          date as string,",
-				"          customer as string,",
-				"          items as (product as string, quantity as integer, price as integer)[],",
-				"          total as integer,",
-				"          payment_method as string",
+				"          Start as date 'yyyy-MM-dd',",
+				"          End as string,",
+				"          Discont as string,",
+				"          Description as string,",
+				"          Category as string,",
+				"          {Sub Category} as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false,",
-				"     documentForm: 'arrayOfDocuments') ~> salesJson",
-				"salesJson foldDown(unroll(items),",
-				"     mapColumn(",
-				"          id,",
-				"          date,",
-				"          customer,",
-				"          product = items.product,",
-				"          quantity = items.quantity,",
-				"          price = items.price,",
-				"          total,",
-				"          payment_method",
-				"     ),",
-				"     skipDuplicateMapInputs: false,",
-				"     skipDuplicateMapOutputs: false) ~> flatten1",
-				"flatten1 sink(allowSchemaDrift: true,",
+				"     ignoreNoFilesFound: false) ~> salesJson",
+				"salesJson filter(Start>toDate($MaxDate, 'yyyy-MM-dd')) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -61,6 +51,7 @@
 				"     format: 'table',",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
 				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 			]
 		}
