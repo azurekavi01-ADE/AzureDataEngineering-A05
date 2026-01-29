@@ -1,5 +1,5 @@
 {
-	"name": "DS_adea05_DB_ADEA05",
+	"name": "DS_ASQL_Stg_Dicount",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_ASQL_DB_ADEA05",
@@ -10,8 +10,7 @@
 		"schema": [],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "final_discountTbl"
+			"table": "TblDiscount_stg"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }
