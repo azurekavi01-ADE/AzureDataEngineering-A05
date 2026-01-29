@@ -7,6 +7,22 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-A05"
 		},
+		"LS_LocalSQLServer_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_LocalSQLServer'"
+		},
+		"LS_LocalSQLServer_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "."
+		},
+		"LS_LocalSQLServer_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "AdventureWorks"
+		},
+		"LS_LocalSQLServer_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sa"
+		},
 		"LocalFileSystem_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "D:\\"
@@ -20,6 +36,32 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_LocalSQLServer')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_LocalSQLServer_properties_typeProperties_server')]",
+					"database": "[parameters('LS_LocalSQLServer_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_LocalSQLServer_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_LocalSQLServer_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "Selfhosted-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LocalFileSystem')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -43,6 +85,48 @@
 					"referenceName": "Selfhosted-IR",
 					"type": "IntegrationRuntimeReference"
 				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Indian_Cities_xlsx')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLSGEN2_adea05",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Cities",
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Cities-List.xlsx",
+						"folderPath": "SourceFiles",
+						"fileSystem": "azuredataengineering-a05"
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": [
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "State",
+						"type": "String"
+					},
+					{
+						"name": "Tier Group",
+						"type": "String"
+					},
+					{
+						"name": "Population in Lakh (2011)",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": []
 		},
@@ -2707,78 +2791,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2026-01-17T01:29:28Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_LocalServerSQL')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_LocalSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "SourceFilename",
-						"type": "varchar"
-					},
-					{
-						"name": "SinkSchemaName",
-						"type": "varchar"
-					},
-					{
-						"name": "SinkTableName",
-						"type": "varchar"
-					},
-					{
-						"name": "MappingInfo",
-						"type": "varchar"
-					},
-					{
-						"name": "update_date",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": "sales"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_LocalServer_with_Parameter')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_LocalSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"TableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@split(dataset().TableName,'.' )[0]",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@split(dataset().TableName,'.' )[1]",
-						"type": "Expression"
-					}
-				}
 			},
 			"dependsOn": []
 		}

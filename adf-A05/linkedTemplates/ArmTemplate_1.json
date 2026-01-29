@@ -6,28 +6,63 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-A05"
-		},
-		"LS_LocalSQLServer_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_LocalSQLServer'"
-		},
-		"LS_LocalSQLServer_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "."
-		},
-		"LS_LocalSQLServer_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "AdventureWorks"
-		},
-		"LS_LocalSQLServer_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "sa"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADEA05_SourceFiles_listoffiles')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLSGEN2_adea05",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "SourceFiles",
+						"fileSystem": "azuredataengineering-a05"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Start",
+						"type": "String"
+					},
+					{
+						"name": "End",
+						"type": "String"
+					},
+					{
+						"name": "Discont",
+						"type": "String"
+					},
+					{
+						"name": "Description",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "Sub Category",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_ADEA05_SplitFilesFolder')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
@@ -839,7 +874,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": "customer100"
+					"table": "CityWeatherReportNew"
 				}
 			},
 			"dependsOn": []
@@ -953,32 +988,6 @@
 						"type": "String"
 					}
 				]
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_LocalSQLServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_LocalSQLServer_properties_typeProperties_server')]",
-					"database": "[parameters('LS_LocalSQLServer_properties_typeProperties_database')]",
-					"encrypt": "optional",
-					"trustServerCertificate": true,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_LocalSQLServer_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_LocalSQLServer_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "Selfhosted-IR",
-					"type": "IntegrationRuntimeReference"
-				}
 			},
 			"dependsOn": []
 		}

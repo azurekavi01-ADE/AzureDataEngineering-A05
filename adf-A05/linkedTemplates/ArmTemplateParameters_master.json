@@ -56,6 +56,9 @@
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
 		},
+		"LS_APIWeather_properties_typeProperties_url": {
+			"value": "http://api.weatherstack.com/current"
+		},
 		"containerUri": {
 			"value": ""
 		},

@@ -73,6 +73,10 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
+		},
+		"LS_APIWeather_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://api.weatherstack.com/current"
 		}
 	},
 	"variables": {
@@ -4753,7 +4757,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": "dbo",
-					"table": "customer100"
+					"table": "CityWeatherReportNew"
 				}
 			},
 			"dependsOn": [
@@ -5111,6 +5115,65 @@
 						"runtimeVersion": "2017",
 						"licenseType": "LicenseIncluded"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Indian_Cities_xlsx')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLSGEN2_adea05",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Cities",
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "Cities-List.xlsx",
+						"folderPath": "SourceFiles",
+						"fileSystem": "azuredataengineering-a05"
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": [
+					{
+						"name": "City",
+						"type": "String"
+					},
+					{
+						"name": "State",
+						"type": "String"
+					},
+					{
+						"name": "Tier Group",
+						"type": "String"
+					},
+					{
+						"name": "Population in Lakh (2011)",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLSGEN2_adea05')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_APIWeather')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LS_APIWeather_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
 				}
 			},
 			"dependsOn": []
