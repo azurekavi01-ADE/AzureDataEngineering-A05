@@ -107,7 +107,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "DS_adea05_DB_ADEA05",
+									"referenceName": "DS_Incremental_Sink",
 									"type": "DatasetReference",
 									"parameters": {
 										"Tblname": {
@@ -117,6 +117,25 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Get meta data detials",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Load Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"waitOnCompletion": true
+							}
 						}
 					]
 				}
