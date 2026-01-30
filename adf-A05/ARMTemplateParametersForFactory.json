@@ -17,6 +17,9 @@
 		"LS_ADLSGEN2_adea05_properties_typeProperties_url": {
 			"value": "https://adea05.dfs.core.windows.net/"
 		},
+		"LS_APIWeather_properties_typeProperties_url": {
+			"value": "http://api.weatherstack.com/current"
+		},
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_server": {
 			"value": "ade-a05.database.windows.net"
 		},
@@ -55,9 +58,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"value": ""
-		},
-		"LS_APIWeather_properties_typeProperties_url": {
-			"value": "http://api.weatherstack.com/current"
 		}
 	}
 }

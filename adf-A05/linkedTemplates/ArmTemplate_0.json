@@ -19,6 +19,10 @@
 			"type": "string",
 			"defaultValue": "https://adea05.dfs.core.windows.net/"
 		},
+		"LS_APIWeather_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://api.weatherstack.com/current"
+		},
 		"LS_ASQL_DB_ADEA05_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "ade-a05.database.windows.net"
@@ -49,10 +53,6 @@
 		},
 		"AzureSSIS-IR_properties_typeProperties_ssisProperties_catalogInfo_catalogAdminPassword": {
 			"type": "secureString"
-		},
-		"LS_APIWeather_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "http://api.weatherstack.com/current"
 		}
 	},
 	"variables": {
@@ -117,6 +117,21 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_APIWeather')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LS_APIWeather_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_ASQL_DB_ADEA05')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -167,16 +182,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Selfhosted-IR')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/AzureSSIS-IR')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -200,7 +205,6 @@
 							"catalogPricingTier": "Basic"
 						},
 						"edition": "Standard",
-						"runtimeVersion": "2017",
 						"licenseType": "LicenseIncluded"
 					}
 				}
@@ -208,17 +212,12 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_APIWeather')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/Selfhosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "RestService",
-				"typeProperties": {
-					"url": "[parameters('LS_APIWeather_properties_typeProperties_url')]",
-					"enableServerCertificateValidation": true,
-					"authenticationType": "Anonymous"
-				}
+				"type": "SelfHosted",
+				"typeProperties": {}
 			},
 			"dependsOn": []
 		},
