@@ -5,12 +5,23 @@
 			"referenceName": "LS_ASQL_DB_ADEA05",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Tblname": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "final_discountTbl"
+			"schema": {
+				"value": "@split(dataset().Tblname,'.')[0]",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@split(dataset().Tblname,'.')[1]",
+				"type": "Expression"
+			}
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
