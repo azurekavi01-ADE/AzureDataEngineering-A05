@@ -43,7 +43,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "Script1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -98,8 +98,8 @@
 							}
 						},
 						{
-							"name": "Append variable1",
-							"type": "AppendVariable",
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
 									"activity": "Get Metadata2",
@@ -108,40 +108,65 @@
 									]
 								}
 							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "LastModifiedDatesArray",
-								"value": {
-									"value": "@string(activity('Get Metadata2').output.lastModified)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set variable1",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Append variable1",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
 							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
 								"secureOutput": false,
 								"secureInput": false
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "OutputArray",
-								"value": {
-									"value": "@variables('LastModifiedDatesArray')",
-									"type": "Expression"
+								"storedProcedureName": "[dbo].[sp_update_stgControlTable]",
+								"storedProcedureParameters": {
+									"Lastmodifieddate": {
+										"value": {
+											"value": "@activity('Get Metadata2').output.lastModified",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									}
 								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_ASQL_DB_ADEA05",
+								"type": "LinkedServiceReference"
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Get Metadata1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL_DB_ADEA05",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "\nTruncate table [dbo].Stg_controlTable "
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			}
 		],
@@ -169,6 +194,9 @@
 			},
 			"OutputArray": {
 				"type": "Array"
+			},
+			"Final": {
+				"type": "String"
 			}
 		},
 		"annotations": []
