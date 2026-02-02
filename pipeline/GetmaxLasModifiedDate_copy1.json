@@ -1,5 +1,5 @@
 {
-	"name": "GetmaxLasModifiedDate",
+	"name": "GetmaxLasModifiedDate_copy1",
 	"properties": {
 		"activities": [
 			{
@@ -98,11 +98,31 @@
 							}
 						},
 						{
+							"name": "Append variable1",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata2",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "LastModifiedDatesArray",
+								"value": {
+									"value": "@string(activity('Get Metadata2').output.lastModified)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
 							"name": "Set variable1",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "Get Metadata2",
+									"activity": "Append variable1",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -114,9 +134,9 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "MaxModifiedDate",
+								"variableName": "OutputArray",
 								"value": {
-									"value": "@if(greater(activity('Get Metadata2').output.lastModified,pipeline().parameters.Param_SourceLastModifiedDate),activity('Get Metadata2').output.lastModified,'1900-01-01')",
+									"value": "@variables('LastModifiedDatesArray')",
 									"type": "Expression"
 								}
 							}
@@ -136,12 +156,19 @@
 			}
 		},
 		"variables": {
-			"MaxLastModifiedDate": {
+			"MaxModifiedDate": {
+				"type": "Array"
+			},
+			"Temp_MaxModifiedDate": {
 				"type": "String",
 				"defaultValue": "1900-01-01T00:00:00Z"
 			},
-			"LastmodififedfromTable": {
-				"type": "String"
+			"LastModifiedDatesArray": {
+				"type": "Array",
+				"defaultValue": []
+			},
+			"OutputArray": {
+				"type": "Array"
 			}
 		},
 		"annotations": []
