@@ -145,22 +145,19 @@
 										"SourcePath": {
 											"value": "@item().SourcePath",
 											"type": "Expression"
+										},
+										"Filename": {
+											"value": "@item().SourceFileName",
+											"type": "Expression"
 										}
 									}
 								},
 								"fieldList": [
-									"childItems"
+									"lastModified"
 								],
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
-									"modifiedDatetimeStart": {
-										"value": "@addSeconds(convertFromUtc(convertToUtc(item().SourceLastModifiedDate,'India Standard Time'),'India Standard Time'),1 )",
-										"type": "Expression"
-									},
-									"modifiedDatetimeEnd": {
-										"value": "@utcNow()",
-										"type": "Expression"
-									},
+									"recursive": true,
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
