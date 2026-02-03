@@ -121,6 +121,8 @@
 						{
 							"name": "Get Metadata1",
 							"type": "GetMetadata",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Load Data",
@@ -170,7 +172,7 @@
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Get Metadata1",
+									"activity": "Execute Pipeline1",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -187,13 +189,6 @@
 							"typeProperties": {
 								"storedProcedureName": "[dbo].[sp_Update_control]",
 								"storedProcedureParameters": {
-									"LastMOdifiedDate": {
-										"value": {
-											"value": "@activity('Get Metadata1').output.lastModified",
-											"type": "Expression"
-										},
-										"type": "DateTime"
-									},
 									"TableName": {
 										"value": {
 											"value": "@item().SinkTable",
@@ -206,6 +201,35 @@
 							"linkedServiceName": {
 								"referenceName": "LS_ASQL_DB_ADEA05",
 								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "GetmaxLasModifiedDate_copy1",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Param_SourceFolder": {
+										"value": "@item().SourcePath",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
